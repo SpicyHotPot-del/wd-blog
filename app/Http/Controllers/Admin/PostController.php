@@ -49,10 +49,10 @@ class PostController extends Controller
 //		$this->postRepository->pushCriteria(new MyCriteria());
 //		$this->postRepository->getByCriteria(new MyCriteria());
 		$userId = Auth::user()->id;
-		if ($userId == 1) {
-			$post = Post::all();
-		} else {
-			$post = Post::all()->where(['user'=>$userId]);
+		if ($userId != 1) {
+			$search = $request->get(config('repository.criteria.params.search', 'search'), null);
+			$param = $search . "&user_id:{$userId}";
+			$request->merge(['search'=>$param]);
 		}
 		return view('admin.post.index', ['posts' => $this->postRepository->all()]);
 	}
