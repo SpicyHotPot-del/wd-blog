@@ -9,7 +9,7 @@ use Prettus\Repository\Criteria\RequestCriteria;
 class PostRepository extends BaseRepository
 {
 	protected $fieldSearchable = [
-		'user_id',
+		'user_id' => 1,
 		'title'=>'like',
 		'created_at'
 	];

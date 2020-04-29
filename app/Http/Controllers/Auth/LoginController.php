@@ -10,17 +10,6 @@ use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
     /**
@@ -51,9 +40,6 @@ class LoginController extends Controller
 
 	protected function validator(array $data)
 	{
-//		return Validator::make($data, [
-//			'password' => ['required', 'string', 'min:7', 'confirmed'],
-//		]);
 		return Validator::make($data, [
 			'captcha' => ['required', 'captcha'],
 		], [
@@ -66,15 +52,9 @@ class LoginController extends Controller
 	{
 		$this->validateLogin($request);
 		Log::error('Parameter verification failed');
-		$validator = $this->validator($request->all());
-//		if ($validator->fails()) {
-//			Log::error('Verification code error');
-//			echo 'Verification code error';die;
-//		}
+		$this->validator($request->all())->validate();
 
-			// If the class is using the ThrottlesLogins trait, we can automatically throttle
-		// the login attempts for this application. We'll key this by the username and
-		// the IP address of the client making these requests into this application.
+
 		if (method_exists($this, 'hasTooManyLoginAttempts') &&
 			$this->hasTooManyLoginAttempts($request)) {
 			$this->fireLockoutEvent($request);
@@ -87,9 +67,6 @@ class LoginController extends Controller
 			return $this->sendLoginResponse($request);
 		}
 
-		// If the login attempt was unsuccessful we will increment the number of attempts
-		// to login and redirect the user back to the login form. Of course, when this
-		// user surpasses their maximum number of attempts they will get locked out.
 		$this->incrementLoginAttempts($request);
 
 		$res = $this->sendFailedLoginResponse($request);

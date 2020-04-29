@@ -2,33 +2,30 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Tag as TagMdl;
 use App\Http\Requests\TagCreateRequest;
 use App\Http\Requests\TagUpdateRequest;
+use App\Services\TagService;
 
 class TagController extends Controller
 {
-    protected $fields = [
-        'tag' => '',
-        'title' => '',
-        'subtitle' => '',
-        'meta_description' => '',
-        'page_image' => '',
-        'layout' => 'blog.layouts.index',
-        'reverse_direction' => 0,
-    ];
+	private $tagService;
 
-    /**
+	public function __construct(TagService $tagService)
+	{
+		$this->tagService = $tagService;
+	}
+
+	/**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $tags = TagMdl::all();
-        return view('admin.tag.index')->withTags($tags);
+	    $data = $this->tagService->getAll();
+        return view('admin.tag.index')->withTags($data);
     }
 
     /**
@@ -38,11 +35,7 @@ class TagController extends Controller
      */
     public function create()
     {
-        $data = [];
-        foreach ($this->fields as $field => $default) {
-            $data[$field] = old($field, $default);
-        }
-
+		$data = $this->tagService->getField();
         return view('admin.tag.create', $data);
     }
 
@@ -55,11 +48,7 @@ class TagController extends Controller
     public function store(TagCreateRequest $request)
     {
         $tag = new TagMdl();
-        foreach (array_keys($this->fields) as $field) {
-            $tag->$field = $request->get($field);
-        }
-        $tag->save();
-    
+        $this->tagService->store($request, $tag);
         return redirect('/admin/tag')
                         ->with('success', '标签「' . $tag->tag . '」创建成功.');
     }
@@ -83,12 +72,7 @@ class TagController extends Controller
      */
     public function edit($id)
     {
-        $tag = TagMdl::findOrFail($id);
-        $data = ['id' => $id];
-        foreach (array_keys($this->fields) as $field) {
-            $data[$field] = old($field, $tag->$field);
-        }
-    
+        $data = $this->tagService->edit($id);
         return view('admin.tag.edit', $data);
     }
 
@@ -102,14 +86,7 @@ class TagController extends Controller
 	 */
     public function update(TagUpdateRequest $request, $id)
     {
-	    $tag = TagMdl::findOrFail($id);
-		dd($request->all());
-	    foreach (array_keys(array_except($this->fields, ['tag'])) as $field) {
-		    $tag->$field = $request->get($field);
-	    }
-
-	    $tag->save();
-
+		$this->tagService->update($request,$id);
 	    return redirect("/admin/tag/$id/edit")
 		    ->with('success', '修改已保存.');
     }
@@ -122,10 +99,8 @@ class TagController extends Controller
 	 */
 	public function destroy($id)
 	{
-		$tag = Tag::findOrFail($id);
-		$tag->delete();
-
+		$this->tagService->del($id);
 		return redirect('/admin/tag')
-			->with('success', '标签「' . $tag->tag . '」已经被删除.');
+			->with('success', '标签已经被删除.');
 	}
 }
