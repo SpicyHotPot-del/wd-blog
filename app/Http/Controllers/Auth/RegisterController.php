@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthRegRequests;
-use App\Services\AuthService;
+use App\Services\AuthRegService;
 
 class RegisterController extends Controller
 {
@@ -26,7 +26,7 @@ class RegisterController extends Controller
      *
      * @return void
      */
-    public function __construct(AuthService $authService)
+    public function __construct(AuthRegService $authService)
     {
     	$this->authService = $authService;
         $this->middleware('guest');
@@ -46,17 +46,6 @@ class RegisterController extends Controller
 	{
 		return view('admin.auth.register');
 	}
-
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return \App\User
-     */
-    protected function create(array $data)
-    {
-        return $this->authService->addUser($data);
-    }
 
 	public function register(AuthRegRequests $request)
 	{
