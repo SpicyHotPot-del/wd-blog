@@ -5,7 +5,6 @@ namespace App\Services;
 
 
 use App\Events\PostEvent;
-use App\Models\Post;
 use App\Models\Tag;
 use App\Repositories\PostRepository;
 use Carbon\Carbon;
@@ -77,7 +76,7 @@ class PostService
 	{
 		$postArr= $request->postFillData();
 		$postArr['user_id'] = Auth::id();
-		$post = Post::create($postArr);
+		$post = $this->postRepository->create($postArr);
 		$post->syncTags($request->get('tags', []));
 		event(new PostEvent($postArr['user_id'], $request->ip(), time()));
 	}
@@ -128,7 +127,7 @@ class PostService
 	 */
 	private function fieldsFromModel($id, array $fields)
 	{
-		$post = Post::findOrFail($id);
+		$post = $this->postRepository->findOrFail($id);
 
 		$fieldNames = array_keys(array_except($fields, ['tags']));
 
@@ -144,7 +143,7 @@ class PostService
 
 	public function findOrFail($id)
 	{
-		return Post::findOrFail($id);;
+		return $this->postRepository->findOrFail($id);;
 	}
 
 	public function destroy($request, $id, $post)

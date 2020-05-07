@@ -18,17 +18,19 @@ class PostController extends Controller
 	}
 
 	/**
-	 * @param PostService $postService
+	 * 主页
 	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
 	 */
 	public function index()
 	{
+//		$data = app()->make('PostService')->view();
 		$data  = $this->postService->view();
 		return view('admin.post.index', ['posts' => $data]);
 	}
 
 	/**
-	 * Show the new post form
+	 * 新增页面
+	 * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
 	 */
 	public function create()
 	{
@@ -37,9 +39,9 @@ class PostController extends Controller
 	}
 
 	/**
-	 * Store a newly created Post
-	 *
+	 * 新建文章
 	 * @param PostCreateRequest $request
+	 * @return \Illuminate\Http\RedirectResponse
 	 */
 	public function store(PostCreateRequest $request)
 	{
@@ -50,7 +52,7 @@ class PostController extends Controller
 	}
 
 	/**
-	 * Show the post edit form
+	 * 修改页
 	 *
 	 * @param int $id
 	 * @return Response
@@ -80,10 +82,11 @@ class PostController extends Controller
 	}
 
 	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param int $id
-	 * @return Response
+	 * 删除文章
+	 * @param PostUpdateRequest $request
+	 * @param $id
+	 * @return \Illuminate\Http\RedirectResponse
+	 * @throws \Illuminate\Auth\Access\AuthorizationException
 	 */
 	public function destroy(PostUpdateRequest $request, $id)
 	{

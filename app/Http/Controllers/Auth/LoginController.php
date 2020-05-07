@@ -3,15 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+use App\Http\Requests\AuthRequests;
+use App\Services\AuthService;
 
 class LoginController extends Controller
 {
-    use AuthenticatesUsers;
-
     /**
      * Where to redirect users after login.
      *
@@ -23,13 +19,16 @@ class LoginController extends Controller
 	
 	protected $lockoutTime = 300;  //登录锁定时间
 
+	protected $AuthService;
+
 	/**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(AuthService $AuthService)
     {
+    	$this->AuthService = $AuthService;
         $this->middleware('guest')->except('logout');
     }
 
@@ -38,42 +37,9 @@ class LoginController extends Controller
         return view('admin.auth.login');
     }
 
-	protected function validator(array $data)
+	public function login(AuthRequests $request)
 	{
-		return Validator::make($data, [
-			'captcha' => ['required', 'captcha'],
-		], [
-			'captcha.required' => '验证码不能为空',
-			'captcha.captcha' => '请输入正确的验证码',
-		]);
-	}
-
-	public function login(Request $request)
-	{
-		$this->validateLogin($request);
-		Log::error('Parameter verification failed');
-		$this->validator($request->all())->validate();
-
-
-		if (method_exists($this, 'hasTooManyLoginAttempts') &&
-			$this->hasTooManyLoginAttempts($request)) {
-			$this->fireLockoutEvent($request);
-			Log::info('login success 1');
-			return $this->sendLockoutResponse($request);
-		}
-
-		if ($this->attemptLogin($request)) {
-			Log::info('login success 2');
-			return $this->sendLoginResponse($request);
-		}
-
-		$this->incrementLoginAttempts($request);
-
-		$res = $this->sendFailedLoginResponse($request);
-		if (!$res) {
-			Log::error('Username does not exist');
-		}
-		Log::info('login success 3');
+		$res = $this->AuthService->loginInfo($request);
 		return $res;
 	}
 
