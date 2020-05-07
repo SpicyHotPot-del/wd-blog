@@ -2,21 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Foundation\Auth\ThrottlesLogins;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Http\Requests\AuthRegRequests;
+use App\Services\AuthService;
 
 class RegisterController extends Controller
 {
-    use RegistersUsers;
-
-	use ThrottlesLogins;
-
-
 	/**
      * Where to redirect users after registration.
      *
@@ -28,13 +19,16 @@ class RegisterController extends Controller
 
 	protected $lockoutTime = 60;  //登录锁定时间
 
+	protected $authService;
+
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(AuthService $authService)
     {
+    	$this->authService = $authService;
         $this->middleware('guest');
     }
 
@@ -61,24 +55,11 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        return $this->authService->addUser($data);
     }
 
-	public function register(Request $request)
+	public function register(AuthRegRequests $request)
 	{
-		$this->throttleKey($request);
-
-		$this->validator($request->all())->validate();
-
-		event(new Registered($user = $this->create($request->all())));
-
-		$this->guard()->login($user);
-
-		return $this->registered($request, $user)
-			?: redirect($this->redirectPath());
+		return $this->authService->reg($request);
 	}
 }
